@@ -16,5 +16,5 @@ The app takes two arguments:
 1. The currency that you want to convert it to.
 
 ```basch
-    node app.js (crypto) (currency)
+    node app.js BTC USD
 ```
