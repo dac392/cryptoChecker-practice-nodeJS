@@ -5,13 +5,17 @@ const crypto_names = require("./crypto-data.json");
 // const binance_url = "https://api.binance.com/api/v3/ticker/24hr";
 
 function parseInput(arg){
+    if(crypto_names[arg.toLowerCase()] === undefined){
+        throw new Error(`Sorry, the key ${arg.toLowerCase()} was not accepted`);
+    }
     return crypto_names[arg.toLowerCase()];
 }
 
 function get(request){
-    const from = parseInput(request);
-    const to = "USD";
+
     try{
+        const from = parseInput(request);
+        const to = "USD";
         const response = https.get(`https://rest.coinapi.io/v1/exchangerate/${from}/${to}?apikey=${api.coinAPI}`,onResponse);
     }catch(e){
         console.error(e.message);
