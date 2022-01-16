@@ -1,12 +1,13 @@
 const https = require("https");
 const http = require("http");
-const url = "https://api.binance.com/api/v3/ticker/24hr";
-const targets = ["BTCUSD", "ETHUSD"]
+const api = require("./api.json");
+// const binance_url = "https://api.binance.com/api/v3/ticker/24hr";
 
-
-function get(){
+function get(request){
+    const from = request[0];
+    const to = request[1];
     try{
-        const response = https.get(url,onResponse);
+        const response = https.get(`https://rest.coinapi.io/v1/exchangerate/${from}/${to}?apikey=${api.coinAPI}`,onResponse);
     }catch(e){
         console.error(e.message);
     }
@@ -18,29 +19,18 @@ function onResponse(obj){
         obj.on('data', data=> body+=data.toString());
         obj.on('end',()=>{
             const crypto = JSON.parse(body);
-            const currencies = [];
-            for(let i = 0; i < crypto.length; i++){
-                for(let j = 0; j < targets.length; j++){
-                    if(crypto[i].symbol.includes(targets[j])){
-                        currencies.push(crypto[i]);
-                    }
-                }
-                if(currencies.length === targets.length) break;
-            }
-            printCryptoValues(currencies);
+            printExchangeRate(crypto);
             
         })
         obj.on("error", error=>console.error(`Problem with request: ${error.message}`));
     }else{
         const e = new Error(`there was an error: (${http.STATUS_CODES[obj.statusCode]})`);
-        printErrorMessage(e);
+        console.error(e.message);
     }
 }
 
-function printCryptoValues(currencies){
-    currencies.forEach(coin => {
-        console.log(`${coin.symbol}: ${coin.openPrice}`)
-    });
+function printExchangeRate(crypto){
+    console.log(`${crypto.asset_id_base} to ${crypto.asset_id_quote}: $${crypto.rate}`)
 }
 
 module.exports.get = get;
