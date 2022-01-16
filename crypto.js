@@ -1,4 +1,5 @@
 const https = require("https");
+const http = require("http");
 const url = "https://api.binance.com/api/v3/ticker/24hr";
 const targets = ["BTCUSD", "ETHUSD"]
 
