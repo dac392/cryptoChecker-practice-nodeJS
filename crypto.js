@@ -1,11 +1,16 @@
 const https = require("https");
 const http = require("http");
 const api = require("./api.json");
+const crypto_names = require("./crypto-data.json");
 // const binance_url = "https://api.binance.com/api/v3/ticker/24hr";
 
+function parseInput(arg){
+    return crypto_names[arg.toLowerCase()];
+}
+
 function get(request){
-    const from = request[0];
-    const to = request[1];
+    const from = parseInput(request);
+    const to = "USD";
     try{
         const response = https.get(`https://rest.coinapi.io/v1/exchangerate/${from}/${to}?apikey=${api.coinAPI}`,onResponse);
     }catch(e){
@@ -13,6 +18,7 @@ function get(request){
     }
     
 }
+
 function onResponse(obj){
     if(obj.statusCode === 200){
         let body = "";
@@ -20,17 +26,23 @@ function onResponse(obj){
         obj.on('end',()=>{
             const crypto = JSON.parse(body);
             printExchangeRate(crypto);
-            
         })
-        obj.on("error", error=>console.error(`Problem with request: ${error.message}`));
+        obj.on("error", error=>console.error(`Problem getting your request: ${error.message}`));
     }else{
-        const e = new Error(`there was an error: (${http.STATUS_CODES[obj.statusCode]})`);
+        const e = new Error(`There was an error with your request: (${http.STATUS_CODES[obj.statusCode]})`);
         console.error(e.message);
     }
 }
 
 function printExchangeRate(crypto){
-    console.log(`${crypto.asset_id_base} to ${crypto.asset_id_quote}: $${crypto.rate}`)
+    if(Number(crypto.rate)>0.01){
+        console.log(`${crypto.asset_id_base} to ${crypto.asset_id_quote}: $${Number(crypto.rate).toFixed(2)}`);
+    }else if((crypto.rate)>0.00001){
+        console.log(`${crypto.asset_id_base} to ${crypto.asset_id_quote}: $${Number(crypto.rate).toFixed(5)}`);
+    }else{
+        console.log(`${crypto.asset_id_base} to ${crypto.asset_id_quote}: $${Number(crypto.rate)}`);
+    }
+    
 }
 
 module.exports.get = get;
